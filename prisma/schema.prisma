@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  //output = "node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Evento {
+  id        Int            @id @default(autoincrement())
+  sigla     String         @unique
+  descricao String
+  edicoes   EdicaoEvento[]
+}
+
+model EdicaoEvento {
+  id       Int      @id @default(autoincrement())
+  ano      Int
+  eventoId Int
+  evento   Evento   @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  artigos  Artigo[]
+  revisores Revisor[]
+
+  @@unique([eventoId, ano])
+}
+
+model Artigo {
+  id          Int          @id @default(autoincrement())
+  titulo      String
+  autores     Json         // Array de strings (ex: ["João Silva", "Maria Santos"])
+  resumo      String
+  areas       Json         // Array de strings (ex: ["Banco de dados", "IA"])
+  pdfUrl      String?      // URL do arquivo PDF (opcional)
+  edicaoId    Int
+  edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  atribuicoes Atribuicao[]
+  perguntas   Pergunta[]
+}
+
+model Revisor {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  areas       Json         // Array de strings (ex: ["Banco de dados", "Segurança"])
+  edicaoId    Int
+  edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+  atribuicoes Atribuicao[]
+}
+
+model Atribuicao {
+  id        Int       @id @default(autoincrement())
+  artigoId  Int
+  revisorId Int
+  artigo    Artigo    @relation(fields: [artigoId], references: [id], onDelete: Cascade)
+  revisor   Revisor   @relation(fields: [revisorId], references: [id], onDelete: Cascade)
+  respostas Resposta[]
+
+  @@unique([artigoId, revisorId])
+}
+
+model Pergunta {
+  id       Int       @id @default(autoincrement())
+  texto    String
+  tipo     String    // Tipo da pergunta (ex: "texto", "escala", "multipla")
+  artigoId Int
+  artigo   Artigo    @relation(fields: [artigoId], references: [id], onDelete: Cascade)
+  respostas Resposta[]
+}
+
+model Resposta {
+  id           Int         @id @default(autoincrement())
+  resposta     String
+  atribuicaoId Int
+  perguntaId   Int
+  atribuicao   Atribuicao  @relation(fields: [atribuicaoId], references: [id], onDelete: Cascade)
+  pergunta     Pergunta    @relation(fields: [perguntaId], references: [id], onDelete: Cascade)
+
+  @@unique([atribuicaoId, perguntaId])
+}
