@@ -6,7 +6,7 @@ generator client {
   //output = "node_modules/@prisma/client"
 }
 
-datasource db {
+datasource db { 
   provider = "sqlite"
   url      = "file:./dev.db"
 }

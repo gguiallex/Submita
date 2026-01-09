@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Submita — Simplificando a submissão científica
 
-## Getting Started
+Plataforma web para gerenciamento de submissão e avaliação de artigos científicos em eventos acadêmicos.
 
-First, run the development server:
+---
+
+## 📘 Sobre o projeto
+
+O Submita é um sistema web desenvolvido para apoiar a organização de eventos científicos, permitindo o cadastro de eventos e suas edições anuais, submissão de artigos em PDF, cadastro de revisores e realização de avaliações por meio de formulários personalizados.
+
+A plataforma busca simplificar todo o fluxo de submissão científica, conectando autores, revisores e organizadores em um único ambiente, promovendo maior agilidade, organização e transparência no processo de avaliação de trabalhos acadêmicos.
+
+---
+
+## 🎯 Objetivo
+
+Desenvolver um sistema web para gerenciamento de submissão e avaliação de artigos científicos em eventos acadêmicos.
+
+---
+
+## 🛠 Tecnologias
+
+- Next.js 16 (Fullstack)
+- React 19
+- TypeScript
+- Prisma ORM
+- SQLite (ambiente de desenvolvimento)
+- Tailwind CSS
+
+> Futuramente o banco de dados poderá ser migrado para MySQL visando ambiente de produção.
+
+---
+
+## ⚙️ Funcionalidades
+
+- Cadastro de eventos científicos e edições anuais  
+- Submissão de artigos em PDF  
+- Cadastro de revisores e áreas de atuação  
+- Associação de revisores aos artigos  
+- Criação de formulários de avaliação  
+- Avaliação de artigos por revisores  
+
+---
+
+## 🗄 Banco de Dados
+
+O projeto utiliza o Prisma ORM para modelagem e acesso ao banco de dados.
+
+Durante o desenvolvimento, o banco utilizado é o SQLite, por simplicidade e facilidade de configuração.
+
+Posteriormente, o banco poderá ser migrado para MySQL sem necessidade de alterações significativas na aplicação.
+
+---
+
+## 🚀 Como executar o projeto
+
+### 1️⃣ Clonar o repositório
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/gguiallex/submita.git
+cd submita
+```
+### 2️⃣ Instalar dependências
+```bash
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3️⃣ Configurar o banco de dados
+Crie um arquivo .env:
+```env
+DATABASE_URL="file:./dev.db"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4️⃣ Rodar as migrations
+Crie um arquivo .env:
+```bash
+npx prisma migrate dev --name init
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 5️⃣ Executar o projeto
+```bash
+npm run dev
+```
+acesse no navegador:
+👉 http://localhost:3000
 
-## Learn More
+### 📁 Estrutura do Projeto
+```bash
+submita/
+├── app/            # Rotas e páginas (Next.js App Router)
+├── prisma/         # Schema e migrations do Prisma
+├── public/         # Arquivos públicos
+├── styles/         # Estilos globais
+├── .env            # Configuração do banco
+├── package.json
+└── README.md
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 📌 Status do Projeto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🚧 Em desenvolvimento — Projeto acadêmico em andamento.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📄 Licença
 
-## Deploy on Vercel
+Projeto acadêmico desenvolvido no contexto da bolsa de pesquisa na UFLA.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 👨‍💻 Autor
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Guilherme Alexandre Cunha Silva
+Graduando em Sistemas de Informação — UFLA
+Projeto desenvolvido no contexto da bolsa de pesquisa em Desenvolvimento de Sistemas de Software Gerenciais.
