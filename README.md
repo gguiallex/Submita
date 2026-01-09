@@ -71,10 +71,9 @@ Crie um arquivo .env:
 DATABASE_URL="file:./dev.db"
 ```
 
-### 4️⃣ Rodar as migrations
-Crie um arquivo .env:
+### 4️⃣ Aplicar o schema ao banco
 ```bash
-npx prisma migrate dev --name init
+npx prisma db push
 ```
 
 ### 5️⃣ Executar o projeto
@@ -87,10 +86,10 @@ acesse no navegador:
 ### 📁 Estrutura do Projeto
 ```bash
 submita/
-├── app/            # Rotas e páginas (Next.js App Router)
+├── src/
+│   └── app/            # Rotas e páginas (Next.js App Router)
 ├── prisma/         # Schema e migrations do Prisma
 ├── public/         # Arquivos públicos
-├── styles/         # Estilos globais
 ├── .env            # Configuração do banco
 ├── package.json
 └── README.md
@@ -99,6 +98,10 @@ submita/
 ### 📌 Status do Projeto
 
 🚧 Em desenvolvimento — Projeto acadêmico em andamento.
+
+#### 📈 Progresso Atual
+- ✅ CRUD básico de Eventos (criar e listar).
+- 🔄 Próximos passos: Implementar edições anuais de eventos, CRUD de artigos (com upload de PDF), revisores e sistema de avaliação.
 
 ### 📄 Licença
 
