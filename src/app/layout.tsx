@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Submita",
   description: "Sistema de Submissão de Artigos para Eventos",
+  icons: {
+    icon: "/IconeSubmita.png",
+  }
 };
 
 export default function RootLayout({
