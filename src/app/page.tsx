@@ -12,8 +12,8 @@ export default function Home() {
 
         <nav className="flex gap-6 text-sm font-medium text-slate-600">
           <a href="/eventos" className="hover:text-blue-600">Eventos</a>
-          <a href="#" className="hover:text-blue-600">Submeter Artigo</a>
-          <a href="#" className="hover:text-blue-600">Login</a>
+          <a href="/artigos" className="hover:text-blue-600">Artigos</a>
+          <a href="/" className="hover:text-blue-600">Início</a>
         </nav>
       </header>
       {/* Hero */}

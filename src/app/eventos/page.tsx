@@ -49,9 +49,9 @@ export default function EventosPage() {
         <span className="font-medium text-slate-600">Cadastrar Eventos</span>
 
         <nav className="flex gap-6 text-sm font-medium text-slate-600">
+          <a href="/eventos" className="hover:text-blue-600">Eventos</a>
+          <a href="/artigos" className="hover:text-blue-600">Artigos</a>
           <a href="/" className="hover:text-blue-600">Início</a>
-          <a href="#" className="hover:text-blue-600">Submeter Artigo</a>
-          <a href="#" className="hover:text-blue-600">Login</a>
         </nav>
       </header>
       <h1 className="text-2xl font-bold mb-4 text-[#0F172A]">Eventos</h1>
