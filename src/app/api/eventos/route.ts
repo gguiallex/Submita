@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
@@ -17,11 +15,18 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { sigla, descricao } = await request.json();
+
+    if (!sigla || !descricao) {
+      return NextResponse.json({ error: 'Sigla e descrição são obrigatórios' }, { status: 400 });
+    }
+
     const evento = await prisma.evento.create({
       data: { sigla, descricao },
     });
+
     return NextResponse.json(evento, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Erro ao criar evento' }, { status: 500 });
   }
 }

@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  //url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model Evento {
@@ -40,7 +40,6 @@ model Artigo {
   edicaoId    Int
   edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
   atribuicoes Atribuicao[]
-  perguntas   Pergunta[]
 }
 
 model Revisor {
@@ -67,10 +66,8 @@ model Pergunta {
   id        Int        @id @default(autoincrement())
   texto     String
   tipo      String // Tipo da pergunta (ex: "texto", "escala", "multipla")
-  //artigoId  Int
-  //artigo    Artigo     @relation(fields: [artigoId], references: [id], onDelete: Cascade)
   edicaoId  Int
-  edicao    EdicaoEvento @relation(fields: [edicaoId], references: [id], inDelete: Cascade)
+  edicao    EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
   respostas Resposta[]
 }
 
