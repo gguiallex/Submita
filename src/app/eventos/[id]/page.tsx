@@ -2,12 +2,14 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import EdicaoForm from '@/components/edicoes/EdicaoForm';
 import Link from 'next/link';
 
 export default function EventoDetalhesPage() {
   const { id } = useParams();
   const [evento, setEvento] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [exibirFormEdicao, setExibirFormEdicao] = useState(false);
 
   const fetchEvento = async () => {
     setLoading(true);
@@ -21,6 +23,21 @@ export default function EventoDetalhesPage() {
       setLoading(false);
     }
   };
+
+  const handleCriarEdicao = async (dados: { ano: number }) => {
+    setLoading(true);
+    try {
+      await fetch('/api/edicoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, // Corrigido para C maiúsculo
+        body: JSON.stringify({ ...dados, eventoId: id }),
+      });
+      setExibirFormEdicao(false);
+      await fetchEvento();
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (id) fetchEvento();
@@ -40,7 +57,7 @@ export default function EventoDetalhesPage() {
         <header className="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm mb-10">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
-              {evento?.sigla?.[0]}
+              {evento?.sigla?.[0] || '?'}
             </div>
             <h1 className="text-4xl font-black text-slate-800 tracking-tight">{evento.sigla}</h1>
           </div>
@@ -53,16 +70,24 @@ export default function EventoDetalhesPage() {
               <h2 className="text-2xl font-bold text-slate-800">Edições</h2>
               <p className="text-slate-500 text-sm">Gerencie os anos deste evento</p>
             </div>
-            {/* O botão de "Nova Edição" que usaremos depois */}
-            <button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg shadow-slate-200">
-              + ADICIONAR ANO
+            <button
+              onClick={() => setExibirFormEdicao(!exibirFormEdicao)}
+              className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg"
+            >
+              {exibirFormEdicao ? 'CANCELAR' : '+ ADICIONAR ANO'}
             </button>
           </div>
 
+          {exibirFormEdicao && (
+            <div className="mb-8 max-w-sm">
+              <EdicaoForm onSubmit={handleCriarEdicao} isLoading={loading} />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {evento.edicoes?.map((ed: any) => (
-              <Link 
-                key={ed.id} 
+              <Link
+                key={ed.id}
                 href={`/edicoes/${ed.id}`}
                 className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all flex items-center justify-between group"
               >
@@ -74,7 +99,7 @@ export default function EventoDetalhesPage() {
                 </span>
               </Link>
             ))}
-            
+
             {evento.edicoes?.length === 0 && (
               <div className="col-span-full py-12 border-2 border-dashed border-slate-200 rounded-3xl text-center">
                 <p className="text-slate-400 italic">Nenhuma edição cadastrada para este evento.</p>

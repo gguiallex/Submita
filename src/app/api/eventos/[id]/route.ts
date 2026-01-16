@@ -2,29 +2,31 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function GET(
-    request: Request,
-    { params }: { params: { id: String }}
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
-    try {
-        const id = (await params).id;
+  try {
+    const { id } = await params; 
 
-        const evento = prisma.evento.findUnique({
-            where: { id: Number(id) },
-            include: {
-                edicoes: {
-                    orderBy: { ano: 'desc'}
-                }
-            },
-        })
+    const evento = await prisma.evento.findUnique({
+      where: { id: Number(id) },
+      include: { 
+        edicoes: {
+          orderBy: {
+            ano: 'desc' // Mostra os anos mais novos primeiro
+          }
+        } 
+      },
+    });
 
-        if (!evento) {
-            return NextResponse.json({ error: 'Evento não encontrado' }, {status: 404 });
-        }
-
-        return NextResponse.json(evento);
-    } catch (error) {
-        return NextResponse.json({ error: 'Erro ao buscar evento' }, { status: 500 });
+    if (!evento) {
+      return NextResponse.json({ error: 'Evento não encontrado' }, { status: 404 });
     }
+
+    return NextResponse.json(evento);
+  } catch (error) {
+    return NextResponse.json({ error: 'Erro ao buscar evento' }, { status: 500 });
+  }
 }
 
 export async function DELETE(
