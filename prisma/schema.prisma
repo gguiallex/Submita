@@ -11,6 +11,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id         Int           @id @default(autoincrement())
+  nome       String
+  sobrenome  String        
+  email      String        @unique
+  senha      String
+  role       String          @default("USER") // ADMIN_GERAL ou USER
+
+  vinculos   VinculoEdicao[]
+  autorias   Autoria[]
+  atribuicoes Atribuicao[]
+}
+
+model VinculoEdicao {
+  id        Int          @id @default(autoincrement())
+  usuarioId Int
+  edicaoId  Int
+  tipo      String       // "CHAIR", "ADMIN_EVENTO", "REVISOR", "AUTOR"
+  
+  usuario   Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  edicao    EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, edicaoId, tipo])
+}
+
 model Evento {
   id        Int            @id @default(autoincrement())
   sigla     String         @unique
@@ -23,8 +48,10 @@ model EdicaoEvento {
   ano       Int
   eventoId  Int
   evento    Evento    @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  
+  vinculos  VinculoEdicao[]
+
   artigos   Artigo[]
-  revisores Revisor[]
   perguntas Pergunta[]
 
   @@unique([eventoId, ano])
@@ -33,33 +60,55 @@ model EdicaoEvento {
 model Artigo {
   id          Int          @id @default(autoincrement())
   titulo      String
-  autores     Json // Array de strings (ex: ["João Silva", "Maria Santos"])
   resumo      String
-  areas       Json // Array de strings (ex: ["Banco de dados", "IA"])
-  pdfUrl      String? // URL do arquivo PDF (opcional)
+  pdfUrl      String?
   edicaoId    Int
   edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
+
+  // RELAÇÕES
+  autores Autoria[] 
   atribuicoes Atribuicao[]
+  areas ArtigoArea[]
 }
 
-model Revisor {
+model Area {
   id          Int          @id @default(autoincrement())
-  nome        String
-  areas       Json // Array de strings (ex: ["Banco de dados", "Segurança"])
-  edicaoId    Int
-  edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
-  atribuicoes Atribuicao[]
+  nome        String       @unique
+
+  artigos ArtigoArea[]
+}
+
+model ArtigoArea {
+  artigoId    Int
+  areaId      Int
+
+  artigo      Artigo       @relation(fields: [artigoId], references: [id], onDelete: Cascade)
+  area        Area         @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  @@id([artigoId, areaId])
+}
+
+model Autoria {
+  id          Int          @id @default(autoincrement())
+  artigoId    Int
+  usuarioId   Int
+  ordem       Int
+
+  artigo      Artigo       @relation(fields: [artigoId], references: [id], onDelete: Cascade)
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([artigoId, usuarioId])
 }
 
 model Atribuicao {
   id        Int        @id @default(autoincrement())
   artigoId  Int
-  revisorId Int
+  usuarioId Int
   artigo    Artigo     @relation(fields: [artigoId], references: [id], onDelete: Cascade)
-  revisor   Revisor    @relation(fields: [revisorId], references: [id], onDelete: Cascade)
+  revisor   Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   respostas Resposta[]
 
-  @@unique([artigoId, revisorId])
+  @@unique([artigoId, usuarioId])
 }
 
 model Pergunta {
