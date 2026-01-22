@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import EventoForm from '@/components/eventos/EventoForm';
 import EventoCard from '@/components/eventos/EventoCard';
+import { useAuth } from '@/context/AuthContext';
 
 interface Evento {
   id: number;
@@ -13,6 +14,7 @@ interface Evento {
 export default function EventosPage() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchEventos();
@@ -41,27 +43,13 @@ export default function EventosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="flex items-center justify-between px-10 py-6 border-b border-slate-200 bg-white">
-        <a href="/">
-          <div className="flex items-center gap-3">
-            <img src="/iconeSubmita.png" alt="Submita" className="w-10 h-10" />
-            <span className="text-2xl font-bold text-blue-600">Submita</span>
-          </div>
-        </a>
-        <span className="font-medium text-slate-600">Artigos</span>
-        <nav className="flex gap-6 text-sm font-medium text-slate-600">
-          <a href="/eventos" className="hover:text-blue-600">Eventos</a>
-          <a href="/artigos" className="hover:text-blue-600">Artigos</a>
-          <a href="/" className="hover:text-blue-600">Início</a>
-        </nav>
-      </header>
-
       <main className="max-w-6xl mx-auto p-10 flex gap-8">
         {/* Lado Esquerdo: Formulário isolado */}
+        {user?.role === 'ADMIN_GERAL' && (
         <div className="w-1/3">
           <EventoForm onSubmit={handleCriarEvento} isLoading={loading} />
         </div>
+        )}
 
         {/* Lado Direito: Listagem */}
         <div className="flex-1">

@@ -2,20 +2,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      {/* Header */}
-      <header className="flex items-center justify-between px-10 py-6 border-b border-slate-200 bg-white">
-        <div className="flex items-center gap-3">
-          <img src="/iconeSubmita.png" alt="Submita" className="w-10 h-10" />
-          <span className="text-2xl font-bold text-blue-600">Submita</span>
-        </div>
-
-        <nav className="flex gap-6 text-sm font-medium text-slate-600">
-          <a href="/eventos" className="hover:text-blue-600">Eventos</a>
-          <a href="/artigos" className="hover:text-blue-600">Artigos</a>
-          <a href="/" className="hover:text-blue-600">Início</a>
-        </nav>
-      </header>
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-0">
       {/* Hero */}
       <section className="flex flex-col items-center justify-center text-center py-24 px-6 bg-gradient-to-br from-blue-600 to-violet-600 text-white">
         <h1 className="text-5xl font-bold mb-6">

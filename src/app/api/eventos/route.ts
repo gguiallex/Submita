@@ -14,7 +14,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sigla, descricao } = await request.json();
+    const { sigla, descricao, usuarioId } = await request.json();
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId }
+    });
+
+    if (!usuario || usuario.role !== 'ADMIN_GERAL') {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+    }
 
     if (!sigla || !descricao) {
       return NextResponse.json({ error: 'Sigla e descrição são obrigatórios' }, { status: 400 });
