@@ -16,7 +16,7 @@ export async function GET(
         });
 
         if (!edicao) {
-            return NextResponse.json({ error: 'Edição não encontrada' }, { status: 404});
+            return NextResponse.json({ error: 'Edição não encontrada' }, { status: 404 });
         }
 
         return NextResponse.json(edicao);
@@ -27,7 +27,16 @@ export async function GET(
 
 export async function POST(request: Request) {
     try {
-        const { ano, eventoId } = await request.json();
+        const { ano, eventoId, usuarioId } = await request.json();
+
+        const usuario = await prisma.usuario.findUnique({
+            where: { id: usuarioId }
+        });
+
+        if (!usuario || usuario.role !== 'ADMIN_GERAL') {
+            return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+        }
+
 
         const novaEdicao = await prisma.edicaoEvento.create({
             data: {

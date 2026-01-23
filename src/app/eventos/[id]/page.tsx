@@ -4,12 +4,14 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import EdicaoForm from '@/components/edicoes/EdicaoForm';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function EventoDetalhesPage() {
   const { id } = useParams();
   const [evento, setEvento] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [exibirFormEdicao, setExibirFormEdicao] = useState(false);
+  const { user } = useAuth(); // Hook de autenticação global
 
   const fetchEvento = async () => {
     setLoading(true);
@@ -25,15 +27,24 @@ export default function EventoDetalhesPage() {
   };
 
   const handleCriarEdicao = async (dados: { ano: number }) => {
+    // 1. Bloqueio preventivo no Frontend
+    if (!user || user.role !== 'ADMIN_GERAL') {
+      alert("Você não tem permissão para realizar esta ação.");
+      return;
+    }
+
     setLoading(true);
     try {
       await fetch('/api/edicoes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }, // Corrigido para C maiúsculo
-        body: JSON.stringify({ ...dados, eventoId: id }),
+        headers: { 'Content-Type': 'application/json' },
+        // 2. Enviamos o usuarioId para validação no Backend
+        body: JSON.stringify({ ...dados, eventoId: id, usuarioId: user.id }),
       });
       setExibirFormEdicao(false);
       await fetchEvento();
+    } catch (error) {
+      console.error("Erro ao criar edição");
     } finally {
       setLoading(false);
     }
@@ -54,32 +65,42 @@ export default function EventoDetalhesPage() {
           <span className="text-xs font-bold uppercase tracking-widest">Voltar para Eventos</span>
         </Link>
 
-        <header className="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm mb-10">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
-              {evento?.sigla?.[0] || '?'}
-            </div>
-            <h1 className="text-4xl font-black text-slate-800 tracking-tight">{evento.sigla}</h1>
+<header className="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm mb-10">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+            {evento?.sigla?.[0] || '?'}
           </div>
-          <p className="text-lg text-slate-500 leading-relaxed">{evento.descricao}</p>
-        </header>
+          <h1 className="text-4xl font-black text-slate-800 tracking-tight">{evento.sigla}</h1>
+        </div>
+        <p className="text-lg text-slate-500 leading-relaxed">{evento.descricao}</p>
+      </header>
 
-        <section>
-          <div className="flex justify-between items-end mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">Edições</h2>
-              <p className="text-slate-500 text-sm">Gerencie os anos deste evento</p>
-            </div>
+      <section>
+        <div className="flex justify-between items-end mb-6">
+          <div>
+            {/* TEXTO DINÂMICO AQUI */}
+            <h2 className="text-2xl font-bold text-slate-800">
+              {user?.role === 'ADMIN_GERAL' ? 'Gerenciar Edições' : 'Edições do Evento'}
+            </h2>
+            <p className="text-slate-500 text-sm">
+              {user?.role === 'ADMIN_GERAL' 
+                ? 'Cadastre e gerencie os anos deste evento' 
+                : 'Selecione um ano para visualizar os detalhes e artigos'}
+            </p>
+          </div>
+          
+          {user?.role === 'ADMIN_GERAL' && (
             <button
               onClick={() => setExibirFormEdicao(!exibirFormEdicao)}
               className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg"
             >
               {exibirFormEdicao ? 'CANCELAR' : '+ ADICIONAR ANO'}
             </button>
-          </div>
+          )}
+        </div>
 
-          {exibirFormEdicao && (
-            <div className="mb-8 max-w-sm">
+          {exibirFormEdicao && user?.role === 'ADMIN_GERAL' && (
+            <div className="mb-8 max-w-sm animate-in fade-in slide-in-from-top-4">
               <EdicaoForm onSubmit={handleCriarEdicao} isLoading={loading} />
             </div>
           )}

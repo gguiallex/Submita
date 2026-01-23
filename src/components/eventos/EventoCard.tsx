@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 interface EventoCardProps {
@@ -10,6 +11,7 @@ interface EventoCardProps {
 }
 
 export default function EventoCard({ id, sigla, descricao, onDelete }: EventoCardProps) {
+  const { user } = useAuth();
   return (
     <div className="bg-white p-5 rounded-xl border border-slate-200 hover:border-blue-300 transition-all shadow-sm group">
       <div className="flex justify-between items-start">
@@ -32,7 +34,9 @@ export default function EventoCard({ id, sigla, descricao, onDelete }: EventoCar
             href={`/eventos/${id}`}
             className="text-center text-xs font-bold py-2 px-4 rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-all"
           >
-            GERENCIAR
+                {user?.role === 'ADMIN_GERAL' 
+                ? 'GERENCIAR' 
+                : 'VISUALIZAR'}
           </Link>
           
           {onDelete && (

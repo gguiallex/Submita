@@ -14,7 +14,7 @@ interface Evento {
 export default function EventosPage() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const { user } = useAuth(); // Acessando o usuário global
 
   useEffect(() => {
     fetchEventos();
@@ -26,16 +26,18 @@ export default function EventosPage() {
     setEventos(data);
   };
 
-  // Esta é a função que passamos para o Form
   const handleCriarEvento = async (dados: { sigla: string; descricao: string }) => {
+    if (!user || user.role !== 'ADMIN_GERAL') return; // Bloqueio de segurança no front
+
     setLoading(true);
     try {
       await fetch('/api/eventos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados),
+        // Enviamos o ID do usuário para o backend validar
+        body: JSON.stringify({ ...dados, usuarioId: user.id }), 
       });
-      await fetchEventos(); // Atualiza a lista
+      await fetchEventos();
     } finally {
       setLoading(false);
     }
@@ -43,17 +45,21 @@ export default function EventosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <main className="max-w-6xl mx-auto p-10 flex gap-8">
-        {/* Lado Esquerdo: Formulário isolado */}
+      {/* Ajuste de layout: centraliza a lista se o form estiver escondido */}
+      <main className={`max-w-6xl mx-auto p-10 flex flex-col md:flex-row gap-8 ${!user || user.role !== 'ADMIN_GERAL' ? 'justify-center' : ''}`}>
+        
+        {/* Renderização condicional para o Administrador */}
         {user?.role === 'ADMIN_GERAL' && (
-        <div className="w-1/3">
-          <EventoForm onSubmit={handleCriarEvento} isLoading={loading} />
-        </div>
+          <div className="w-full md:w-1/3">
+            <h2 className="font-bold mb-4 text-slate-800">Novo Evento</h2>
+            <EventoForm onSubmit={handleCriarEvento} isLoading={loading} />
+          </div>
         )}
 
-        {/* Lado Direito: Listagem */}
-        <div className="flex-1">
-          <h1 className=" font-bold mb-6 text-slate-800">Eventos Cadastrados</h1>
+        <div className={user?.role === 'ADMIN_GERAL' ? 'flex-1' : 'w-full max-w-3xl'}>
+          <h1 className="text-2xl font-bold mb-6 text-slate-800 text-center md:text-left">
+            Eventos Cadastrados
+          </h1>
           <div className="grid gap-4">
             {eventos.map((evento) => (
               <EventoCard
@@ -61,14 +67,10 @@ export default function EventosPage() {
                 id={evento.id}
                 sigla={evento.sigla}
                 descricao={evento.descricao}
-                //onDelete={handleDeleteEvento}
               />
             ))}
-
             {eventos.length === 0 && (
-              <p className="text-center text-slate-400 py-10 italic">
-                Nenhum evento encontrado.
-              </p>
+              <p className="text-center text-slate-400 py-10 italic">Nenhum evento encontrado.</p>
             )}
           </div>
         </div>

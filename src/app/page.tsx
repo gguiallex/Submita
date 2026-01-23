@@ -1,31 +1,37 @@
+'use client'
+
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 p-0">
       {/* Hero */}
-      <section className="flex flex-col items-center justify-center text-center py-24 px-6 bg-gradient-to-br from-blue-600 to-violet-600 text-white">
-        <h1 className="text-5xl font-bold mb-6">
-          Submita
-        </h1>
-
-        <p className="text-xl max-w-2xl mb-8">
-          Plataforma integrada para gestão de eventos científicos.
-        </p>
-
-        <div className="flex gap-4">
-          <button className="px-6 py-3 rounded-xl bg-white text-blue-600 font-semibold hover:bg-slate-100 transition">
-            Submeter artigo
-          </button>
-
-          <Link href="/eventos">
-            <button className="px-6 py-3 rounded-xl border border-white text-white hover:bg-white/10 transition">
+<section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h1 className="text-5xl font-bold mb-6">Submita</h1>
+          <p className="text-xl mb-10 opacity-90">Plataforma integrada para gestão de eventos científicos.</p>
+          
+          <div className="flex flex-wrap justify-center gap-4">
+            {/* Se não estiver logado, manda para o login primeiro */}
+            <Link 
+              href={user ? "/artigos/novo" : "/login"} 
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-blue-50 transition-colors shadow-lg"
+            >
+              Submeter artigo
+            </Link>
+            
+            <Link 
+              href="/eventos" 
+              className="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white/10 transition-colors"
+            >
               Ver eventos
-            </button>
-          </Link>
+            </Link>
+          </div>
         </div>
       </section>
-
       {/* Funcionalidades */}
       <section className="py-20 px-10 max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12">
