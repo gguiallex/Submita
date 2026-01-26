@@ -23,7 +23,6 @@ export default function PainelEdicaoPage() {
 
   if (loading) return <div className="p-20 text-center text-slate-400">Carregando painel...</div>;
 
-  // Estados de permissão claros
   const isLogado = !!user;
   const isAdmin = user?.role === 'ADMIN_GERAL';
   const isChair = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'CHAIR');
@@ -36,19 +35,31 @@ export default function PainelEdicaoPage() {
           ← VOLTAR PARA O EVENTO
         </Link>
 
-        <header className="mt-6 mb-10">
-          <h1 className="text-3xl md:text-4xl font-black text-slate-800">
-            {edicao?.evento?.sigla} <span className="text-blue-600">{edicao?.ano}</span>
-          </h1>
-          <p className="text-slate-500">
-            {podeGerenciar ? 'Painel de Gerenciamento da Edição' : 'Informações da Edição'}
-          </p>
+        <header className="mt-6 mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-slate-800">
+              {edicao?.evento?.sigla} <span className="text-blue-600">{edicao?.ano}</span>
+            </h1>
+            <p className="text-slate-500">
+              {podeGerenciar ? 'Painel de Gerenciamento da Edição' : 'Informações da Edição'}
+            </p>
+          </div>
+
+          {/* BOTÃO DE SUBMISSÃO: Visível apenas para quem está logado e não é o administrador da edição */}
+          {isLogado && !podeGerenciar && (
+            <Link 
+              href={`/edicoes/${id}/submeter`}
+              className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] transition-all text-center"
+            >
+              SUBMETER TRABALHO
+            </Link>
+          )}
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <CardGestao
-            titulo="Artigos"
-            subtitulo={podeGerenciar ? "Gerenciar submissões" : "Ver submissões"}
+          <CardGestao 
+            titulo="Artigos" 
+            subtitulo={podeGerenciar ? "Gerenciar submissões" : "Ver minhas submissões"} 
             href={`/edicoes/${id}/artigos`}
             cor="bg-orange-500"
           />
@@ -61,7 +72,6 @@ export default function PainelEdicaoPage() {
           )}
         </div>
 
-        {/* Lógica de rodapé baseada no login */}
         {!isLogado ? (
           <div className="mt-12 p-8 bg-amber-50 rounded-3xl border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -77,7 +87,7 @@ export default function PainelEdicaoPage() {
             <div className="mt-12 p-8 bg-blue-50 rounded-3xl border border-blue-100">
               <h3 className="text-blue-800 font-bold mb-2">Área do Autor</h3>
               <p className="text-blue-600 text-sm">
-                Você está visualizando esta edição como autor. Aqui você pode acompanhar o status das suas submissões e ver os feedbacks dos revisores.
+                Bem-vindo! Aqui você pode acompanhar o status das suas submissões e ver os feedbacks após as avaliações. Utilize o botão acima para enviar um novo trabalho.
               </p>
             </div>
           )
@@ -86,8 +96,6 @@ export default function PainelEdicaoPage() {
     </div>
   );
 }
-
-// ... CardGestao permanece igual
 
 function CardGestao({ titulo, subtitulo, href, cor }: any) {
   return (

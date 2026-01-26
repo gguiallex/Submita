@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext'; // Importe o hook useAuth
+import Link from 'next/link';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState('');
     const router = useRouter();
-    
+
     // Pegamos a função login do contexto
     const { login } = useAuth();
 
@@ -24,11 +25,11 @@ export default function LoginPage() {
 
         if (res.ok) {
             const usuario = await res.json();
-            
+
             // 1. Usamos a função login do contexto. 
             // Ela já salva no localStorage e avisa a Navbar na hora!
-            login(usuario); 
-            
+            login(usuario);
+
             // 2. Redirecionamos para a home
             router.push('/');
         } else {
@@ -75,6 +76,12 @@ export default function LoginPage() {
                         Entrar
                     </button>
                 </form>
+
+                <div className="pt-4 border-t border-slate-100 text-center">
+                    <p className="text-sm text-slate-500">
+                        Não possui cadastro? <Link href="/registro" className="text-blue-600 font-bold hover:underline">Acesse aqui</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

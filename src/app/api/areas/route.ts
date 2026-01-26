@@ -2,13 +2,13 @@ import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 export async function GET() {
     try {
-        const areas = prisma.area.findMany({
+        const areas = await prisma.area.findMany({
             orderBy: {
                 nome: 'asc'
             }
         });
 
-        return areas;
+        return NextResponse.json(areas);
     } catch (error) {
         console.error("Erro ao buscar áreas: ", error);
         return NextResponse.json(

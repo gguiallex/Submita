@@ -11,7 +11,7 @@ export default function Navbar() {
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          
+
           {/* Logo / Home - Usando Link do Next para não recarregar a página */}
           <Link href="/">
             <div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export default function Navbar() {
                     + Novo Evento
                   </Link>
                 )*/}
-                
+
                 <span className="text-gray-700 text-sm hidden sm:block">
                   Olá, <strong>{user.nome}</strong>
                 </span>
@@ -47,12 +47,21 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                Entrar
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Entrar
+                </Link>
+
+                <Link
+                  href="/registro"
+                  className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-all"
+                >
+                  Criar conta
+                </Link>
+              </div>
             )}
           </div>
         </div>
