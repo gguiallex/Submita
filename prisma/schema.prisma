@@ -62,6 +62,7 @@ model Artigo {
   titulo      String
   resumo      String
   pdfUrl      String?
+  status      String       @default("PENDENTE")
   edicaoId    Int
   edicao      EdicaoEvento @relation(fields: [edicaoId], references: [id], onDelete: Cascade)
 

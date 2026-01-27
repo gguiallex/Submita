@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Use a instância global que você já tem
+import prisma from '@/lib/prisma';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
+// LISTAR ARTIGOS
 export async function GET() {
   try {
     const artigos = await prisma.artigo.findMany({
       include: {
-        areas: { include: { area: true } }, // Inclui os nomes das áreas
-        autores: { include: { usuario: true } } // Inclui os nomes dos autores
+        areas: { include: { area: true } },
+        autores: { include: { usuario: true } }
       }
     });
     return NextResponse.json(artigos);
@@ -15,35 +18,61 @@ export async function GET() {
   }
 }
 
+// CRIAR ARTIGO COM PDF
 export async function POST(request: NextRequest) {
   try {
-    const { titulo, resumo, areas, edicaoId, usuarioId } = await request.json();
+    const formData = await request.formData();
+    
+    // Capturando os dados do FormData
+    const titulo = formData.get('titulo') as string;
+    const resumo = formData.get('resumo') as string;
+    const edicaoId = Number(formData.get('edicaoId'));
+    const usuarioId = Number(formData.get('usuarioId'));
+    const areasRaw = formData.get('areas') as string;
+    const areas = JSON.parse(areasRaw); // As áreas vêm como string de array
+    const file = formData.get('pdf') as File;
 
-    // O Prisma exige que relacionamentos N:N sejam criados assim:
+    if (!file) {
+      return NextResponse.json({ error: "O arquivo PDF é obrigatório" }, { status: 400 });
+    }
+
+    // 1. SALVAR O ARQUIVO NO DISCO (public/uploads/artigos)
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Nome único para evitar conflitos
+    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads', 'artigos', fileName);
+    
+    await writeFile(uploadPath, buffer);
+    const pdfUrl = `/uploads/artigos/${fileName}`;
+
+    // 2. SALVAR NO BANCO COM PRISMA
     const artigo = await prisma.artigo.create({
       data: {
         titulo,
         resumo,
-        edicaoId: Number(edicaoId),
-        // Criando o vínculo na tabela ArtigoArea
+        pdfUrl, // Link para o arquivo
+        status: "PENDENTE",
+        edicaoId: edicaoId,
         areas: {
           create: areas.map((areaId: number) => ({
             areaId: areaId
           }))
         },
-        // Criando o vínculo na tabela ArtigoAutor
         autores: {
           create: {
             usuarioId: usuarioId,
-            ordem: 1 // O usuário que submeteu é o primeiro autor
+            ordem: 1
           }
         }
       },
     });
 
     return NextResponse.json(artigo, { status: 201 });
+
   } catch (error) {
-    console.error("ERRO NO PRISMA:", error);
-    return NextResponse.json({ error: 'Erro ao criar artigo' }, { status: 500 });
+    console.error("ERRO NA SUBMISSÃO:", error);
+    return NextResponse.json({ error: 'Erro ao processar submissão' }, { status: 500 });
   }
 }

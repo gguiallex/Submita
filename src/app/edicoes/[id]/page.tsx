@@ -28,6 +28,30 @@ export default function PainelEdicaoPage() {
   const isChair = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'CHAIR');
   const podeGerenciar = isAdmin || isChair;
 
+  // DEFINIÇÃO DOS TEXTOS DO CARD DE ARTIGOS
+  const getArtigosInfo = () => {
+    if (!isLogado) return { 
+      titulo: "Artigos", 
+      sub: "Acesso restrito a autores", 
+      href: "#", // Não leva a lugar nenhum
+      label: "Bloqueado" 
+    };
+    if (podeGerenciar) return { 
+      titulo: "Artigos", 
+      sub: "Gerenciar submissões", 
+      href: `/edicoes/${id}/artigos`, 
+      label: "Gerenciar →" 
+    };
+    return { 
+      titulo: "Meus Artigos", 
+      sub: "Minhas submissões", 
+      href: `/edicoes/${id}/artigos`, 
+      label: "Acessar →" 
+    };
+  };
+
+  const artigosCard = getArtigosInfo();
+
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
@@ -45,7 +69,6 @@ export default function PainelEdicaoPage() {
             </p>
           </div>
 
-          {/* BOTÃO DE SUBMISSÃO: Visível apenas para quem está logado e não é o administrador da edição */}
           {isLogado && !podeGerenciar && (
             <Link 
               href={`/edicoes/${id}/submeter`}
@@ -57,26 +80,30 @@ export default function PainelEdicaoPage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* CARD DE ARTIGOS COM LÓGICA DINÂMICA */}
           <CardGestao 
-            titulo="Artigos" 
-            subtitulo={podeGerenciar ? "Gerenciar submissões" : "Ver minhas submissões"} 
-            href={`/edicoes/${id}/artigos`}
+            titulo={artigosCard.titulo} 
+            subtitulo={artigosCard.sub} 
+            href={artigosCard.href}
             cor="bg-orange-500"
+            label={artigosCard.label}
+            disabled={!isLogado}
           />
 
           {podeGerenciar && (
             <>
-              <CardGestao titulo="Revisores" subtitulo="Banca examinadora" href={`/edicoes/${id}/revisores`} cor="bg-purple-500" />
-              <CardGestao titulo="Perguntas" subtitulo="Critérios de avaliação" href={`/edicoes/${id}/perguntas`} cor="bg-green-500" />
+              <CardGestao titulo="Revisores" subtitulo="Banca examinadora" href={`/edicoes/${id}/revisores`} cor="bg-purple-500" label="Gerenciar →" />
+              <CardGestao titulo="Perguntas" subtitulo="Critérios de avaliação" href={`/edicoes/${id}/perguntas`} cor="bg-green-500" label="Definir →" />
             </>
           )}
         </div>
 
+        {/* BANNERS DE INFORMAÇÃO INFERIORES */}
         {!isLogado ? (
           <div className="mt-12 p-8 bg-amber-50 rounded-3xl border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
-              <h3 className="text-amber-800 font-bold mb-1">Acesso Restrito</h3>
-              <p className="text-amber-700 text-sm">Faça login para submeter artigos ou acompanhar suas participações.</p>
+              <h3 className="text-amber-800 font-bold mb-1">Deseja submeter um trabalho?</h3>
+              <p className="text-amber-700 text-sm">Crie uma conta ou faça login para enviar seus artigos e acompanhar as avaliações.</p>
             </div>
             <Link href="/login" className="bg-amber-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-amber-700 transition-colors">
               Fazer Login
@@ -87,7 +114,7 @@ export default function PainelEdicaoPage() {
             <div className="mt-12 p-8 bg-blue-50 rounded-3xl border border-blue-100">
               <h3 className="text-blue-800 font-bold mb-2">Área do Autor</h3>
               <p className="text-blue-600 text-sm">
-                Bem-vindo! Aqui você pode acompanhar o status das suas submissões e ver os feedbacks após as avaliações. Utilize o botão acima para enviar um novo trabalho.
+                Bem-vindo! Você pode enviar novos trabalhos clicando em "Submeter Trabalho" ou revisar os já enviados no card de Artigos.
               </p>
             </div>
           )
@@ -97,13 +124,20 @@ export default function PainelEdicaoPage() {
   );
 }
 
-function CardGestao({ titulo, subtitulo, href, cor }: any) {
-  return (
-    <Link href={href} className="bg-white p-8 rounded-3xl border border-slate-200 hover:shadow-xl transition-all group">
+// COMPONENTE DE CARD ATUALIZADO
+function CardGestao({ titulo, subtitulo, href, cor, label, disabled }: any) {
+  const content = (
+    <div className={`bg-white p-8 rounded-3xl border border-slate-200 transition-all group h-full ${disabled ? 'opacity-60 grayscale-[0.5]' : 'hover:shadow-xl'}`}>
       <div className={`w-10 h-1 ${cor} mb-4 rounded-full`}></div>
       <h3 className="text-xl font-bold text-slate-800">{titulo}</h3>
       <p className="text-slate-500 text-sm mb-6">{subtitulo}</p>
-      <span className="text-xs font-bold text-slate-300 group-hover:text-blue-600 transition-colors uppercase">Acessar →</span>
-    </Link>
+      <span className={`text-xs font-bold transition-colors uppercase ${disabled ? 'text-slate-300' : 'text-slate-300 group-hover:text-blue-600'}`}>
+        {label}
+      </span>
+    </div>
   );
+
+  if (disabled) return content;
+
+  return <Link href={href}>{content}</Link>;
 }
