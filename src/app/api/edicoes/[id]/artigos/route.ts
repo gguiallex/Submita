@@ -30,7 +30,8 @@ export async function GET(
         },
         autores: {
           include: { usuario: true }
-        }
+        },
+        atribuicoes: true
       },
       orderBy: { id: 'desc' }
     });

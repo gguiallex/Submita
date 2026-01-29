@@ -8,6 +8,9 @@ export async function POST(request:Request) {
 
         const usuario = await prisma.usuario.findUnique({
             where: { email },
+            include: {
+                vinculos: true
+            }
         });
 
         if(usuario) {

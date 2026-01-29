@@ -30,8 +30,17 @@ export default function LoginPage() {
             // Ela já salva no localStorage e avisa a Navbar na hora!
             login(usuario);
 
-            // 2. Redirecionamos para a home
-            router.push('/');
+            // LÓGICA DE REDIRECIONAMENTO INTELIGENTE
+            const isRevisor = usuario.vinculos?.some((v: any) => v.tipo === 'REVISOR');
+            const isAdmin = usuario.role === 'ADMIN_GERAL';
+
+            if (isAdmin) {
+                router.push('/'); // Admin geralmente vê a visão global
+            } else if (isRevisor) {
+                router.push('/revisor'); // Revisor vai direto para suas tarefas
+            } else {
+                router.push('/'); // Autor/User comum vai para a home
+            }
         } else {
             setErro('E-mail ou senha incorretos.');
         }

@@ -8,12 +8,12 @@ import Link from 'next/link';
 export default function ListaArtigosPage() {
   const { id } = useParams();
   const { user } = useAuth();
-  
+
   // Estados da Lista
   const [artigos, setArtigos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [artigoAberto, setArtigoAberto] = useState<number | null>(null);
-  
+
   // Estados para Atribuição de Revisores
   const [revisores, setRevisores] = useState<any[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
@@ -71,6 +71,25 @@ export default function ListaArtigosPage() {
     }
   };
 
+  const handleRemoverAtribuicao = async (revisorId: number) => {
+    if (!confirm("Deseja realmente remover este revisor deste artigo?")) return;
+
+    try {
+      // Passamos o artigoParaAtribuir no path e o revisorId como query string
+      const res = await fetch(`/api/artigos/${artigoParaAtribuir}/atribuir?usuarioId=${revisorId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        fetchArtigos(); // Recarrega a lista para atualizar o estado do modal
+      } else {
+        alert("Erro ao remover revisor.");
+      }
+    } catch (error) {
+      console.error("Erro na remoção:", error);
+    }
+  };
+
   const handleStatus = async (artigoId: number, novoStatus: string) => {
     try {
       const res = await fetch(`/api/artigos/${artigoId}`, {
@@ -106,9 +125,8 @@ export default function ListaArtigosPage() {
           {artigos.map((artigo) => (
             <div
               key={artigo.id}
-              className={`bg-white rounded-3xl border transition-all duration-300 ${
-                artigoAberto === artigo.id ? 'border-blue-500 shadow-xl scale-[1.01]' : 'border-slate-200 hover:border-slate-300 shadow-sm'
-              }`}
+              className={`bg-white rounded-3xl border transition-all duration-300 ${artigoAberto === artigo.id ? 'border-blue-500 shadow-xl scale-[1.01]' : 'border-slate-200 hover:border-slate-300 shadow-sm'
+                }`}
             >
               {/* Cabeçalho do Card (Clickable) */}
               <div
@@ -118,11 +136,10 @@ export default function ListaArtigosPage() {
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-2">
                     <h2 className="text-lg font-bold text-slate-800 leading-tight">{artigo.titulo}</h2>
-                    <span className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider ${
-                      artigo.status === 'APROVADO' ? 'bg-green-100 text-green-700' :
-                      artigo.status === 'REJEITADO' ? 'bg-red-100 text-red-700' : 
-                      artigo.status === 'EM_AVALIACAO' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
-                    }`}>
+                    <span className={`text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider ${artigo.status === 'APROVADO' ? 'bg-green-100 text-green-700' :
+                      artigo.status === 'REJEITADO' ? 'bg-red-100 text-red-700' :
+                        artigo.status === 'EM_AVALIACAO' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
                       {artigo.status?.replace('_', ' ') || 'PENDENTE'}
                     </span>
                   </div>
@@ -225,42 +242,47 @@ export default function ListaArtigosPage() {
 
       {/* MODAL DE SELEÇÃO DE REVISOR */}
       {modalAberto && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h2 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">Atribuir Revisor</h2>
-            <p className="text-slate-500 text-sm mb-8">Escolha um avaliador para analisar este trabalho.</p>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95">
+            <h2 className="text-2xl font-black text-slate-800 mb-2">Equipe de Avaliação</h2>
+            <p className="text-slate-500 text-sm mb-8">Gerencie os revisores para este artigo.</p>
 
-            <div className="space-y-3 max-h-72 overflow-y-auto mb-8 pr-2 custom-scrollbar">
-              {revisores.map((revisor) => (
-                <button
-                  key={revisor.id}
-                  onClick={() => salvarAtribuicao(revisor.id)}
-                  className="w-full flex items-center justify-between p-5 rounded-2xl border border-slate-100 hover:border-blue-500 hover:bg-blue-50 transition-all group text-left"
-                >
-                  <div>
-                    <span className="font-bold text-slate-700 group-hover:text-blue-700 block">{revisor.nome} {revisor.sobrenome}</span>
-                    <span className="text-[10px] text-slate-400 font-medium">{revisor.email}</span>
+            <div className="space-y-3 max-h-80 overflow-y-auto mb-8 pr-2 custom-scrollbar">
+              {revisores.map((revisor) => {
+                const artigoAtual = artigos.find(a => a.id === artigoParaAtribuir);
+                const jaAtribuido = artigoAtual?.atribuicoes?.some((at: any) => at.usuarioId === revisor.id);
+
+                return (
+                  <div key={revisor.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${jaAtribuido ? 'bg-blue-50 border-blue-100' : 'bg-white border-slate-100 hover:border-slate-200'
+                    }`}>
+                    <div className="flex-1">
+                      <span className={`font-bold block ${jaAtribuido ? 'text-blue-700' : 'text-slate-700'}`}>
+                        {revisor.nome} {revisor.sobrenome}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">{revisor.email}</span>
+                    </div>
+
+                    {jaAtribuido ? (
+                      <button
+                        onClick={() => handleRemoverAtribuicao(revisor.id)}
+                        className="text-[10px] bg-red-100 text-red-600 px-3 py-1.5 rounded-full font-black hover:bg-red-600 hover:text-white transition-all uppercase"
+                      >
+                        Remover
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => salvarAtribuicao(revisor.id)}
+                        className="text-[10px] bg-blue-600 text-white px-3 py-1.5 rounded-full font-black hover:shadow-lg transition-all uppercase"
+                      >
+                        Atribuir
+                      </button>
+                    )}
                   </div>
-                  <span className="text-[10px] bg-slate-100 px-3 py-1 rounded-full uppercase font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    Selecionar
-                  </span>
-                </button>
-              ))}
-              
-              {revisores.length === 0 && (
-                <div className="py-10 text-center">
-                   <p className="text-slate-400 text-sm italic">Nenhum revisor disponível nesta edição.</p>
-                   <Link href={`/edicoes/${id}/revisores`} className="text-blue-600 text-xs font-bold hover:underline mt-2 inline-block">
-                     Cadastrar Revisores →
-                   </Link>
-                </div>
-              )}
+                );
+              })}
             </div>
 
-            <button
-              onClick={() => setModalAberto(false)}
-              className="w-full py-4 text-slate-400 font-black hover:text-slate-600 transition-colors uppercase text-xs tracking-[0.2em]"
-            >
+            <button onClick={() => setModalAberto(false)} className="w-full py-4 text-slate-400 font-black hover:text-slate-600 uppercase text-xs tracking-widest">
               FECHAR JANELA
             </button>
           </div>

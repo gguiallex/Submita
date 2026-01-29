@@ -24,30 +24,18 @@ export default function PainelEdicaoPage() {
   if (loading) return <div className="p-20 text-center text-slate-400">Carregando painel...</div>;
 
   const isLogado = !!user;
-  const isAdmin = user?.role === 'ADMIN_GERAL';
+  const isAdminGeral = user?.role === 'ADMIN_GERAL';
+  
+  // VERIFICAÇÃO DE VÍNCULOS ESPECÍFICOS DESTA EDIÇÃO
+  const isRevisor = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'REVISOR');
   const isChair = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'CHAIR');
-  const podeGerenciar = isAdmin || isChair;
+  
+  const podeGerenciar = isAdminGeral || isChair;
 
-  // DEFINIÇÃO DOS TEXTOS DO CARD DE ARTIGOS
   const getArtigosInfo = () => {
-    if (!isLogado) return { 
-      titulo: "Artigos", 
-      sub: "Acesso restrito a autores", 
-      href: "#", // Não leva a lugar nenhum
-      label: "Bloqueado" 
-    };
-    if (podeGerenciar) return { 
-      titulo: "Artigos", 
-      sub: "Gerenciar submissões", 
-      href: `/edicoes/${id}/artigos`, 
-      label: "Gerenciar →" 
-    };
-    return { 
-      titulo: "Meus Artigos", 
-      sub: "Minhas submissões", 
-      href: `/edicoes/${id}/artigos`, 
-      label: "Acessar →" 
-    };
+    if (!isLogado) return { titulo: "Artigos", sub: "Acesso restrito", href: "#", label: "Bloqueado" };
+    if (podeGerenciar) return { titulo: "Artigos", sub: "Gerenciar submissões", href: `/edicoes/${id}/artigos`, label: "Gerenciar →" };
+    return { titulo: "Meus Artigos", sub: "Minhas submissões", href: `/edicoes/${id}/artigos`, label: "Acessar →" };
   };
 
   const artigosCard = getArtigosInfo();
@@ -65,7 +53,7 @@ export default function PainelEdicaoPage() {
               {edicao?.evento?.sigla} <span className="text-blue-600">{edicao?.ano}</span>
             </h1>
             <p className="text-slate-500">
-              {podeGerenciar ? 'Painel de Gerenciamento da Edição' : 'Informações da Edição'}
+              {podeGerenciar ? 'Painel de Gerenciamento' : isRevisor ? 'Painel do Revisor' : 'Informações da Edição'}
             </p>
           </div>
 
@@ -80,7 +68,6 @@ export default function PainelEdicaoPage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* CARD DE ARTIGOS COM LÓGICA DINÂMICA */}
           <CardGestao 
             titulo={artigosCard.titulo} 
             subtitulo={artigosCard.sub} 
@@ -90,6 +77,17 @@ export default function PainelEdicaoPage() {
             disabled={!isLogado}
           />
 
+          {/* NOVO CARD: APARECE APENAS PARA REVISORES DESTA EDIÇÃO */}
+          {isRevisor && (
+            <CardGestao 
+              titulo="Avaliação" 
+              subtitulo="Trabalhos para revisar" 
+              href="/revisor" 
+              cor="bg-amber-500" 
+              label="Avaliar →" 
+            />
+          )}
+
           {podeGerenciar && (
             <>
               <CardGestao titulo="Revisores" subtitulo="Banca examinadora" href={`/edicoes/${id}/revisores`} cor="bg-purple-500" label="Gerenciar →" />
@@ -98,33 +96,40 @@ export default function PainelEdicaoPage() {
           )}
         </div>
 
-        {/* BANNERS DE INFORMAÇÃO INFERIORES */}
+        {/* BANNERS DINÂMICOS */}
         {!isLogado ? (
-          <div className="mt-12 p-8 bg-amber-50 rounded-3xl border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-amber-800 font-bold mb-1">Deseja submeter um trabalho?</h3>
-              <p className="text-amber-700 text-sm">Crie uma conta ou faça login para enviar seus artigos e acompanhar as avaliações.</p>
-            </div>
-            <Link href="/login" className="bg-amber-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-amber-700 transition-colors">
-              Fazer Login
-            </Link>
-          </div>
+          <BannerLogin />
         ) : (
-          !podeGerenciar && (
-            <div className="mt-12 p-8 bg-blue-50 rounded-3xl border border-blue-100">
-              <h3 className="text-blue-800 font-bold mb-2">Área do Autor</h3>
-              <p className="text-blue-600 text-sm">
-                Bem-vindo! Você pode enviar novos trabalhos clicando em "Submeter Trabalho" ou revisar os já enviados no card de Artigos.
-              </p>
-            </div>
-          )
+          <div className={`mt-12 p-8 rounded-3xl border ${isRevisor ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'}`}>
+            <h3 className={`font-bold mb-2 ${isRevisor ? 'text-amber-800' : 'text-blue-800'}`}>
+              {isRevisor ? 'Área de Atuação: Revisor' : 'Área do Autor'}
+            </h3>
+            <p className={`text-sm ${isRevisor ? 'text-amber-700' : 'text-blue-600'}`}>
+              {isRevisor 
+                ? 'Você faz parte da banca examinadora desta edição. Utilize o card de "Avaliação" para acessar os trabalhos atribuídos a você.' 
+                : 'Bem-vindo! Você pode submeter novos trabalhos ou acompanhar o status dos seus envios.'}
+            </p>
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-// COMPONENTE DE CARD ATUALIZADO
+function BannerLogin() {
+  return (
+    <div className="mt-12 p-8 bg-amber-50 rounded-3xl border border-amber-100 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <h3 className="text-amber-800 font-bold mb-1">Deseja participar?</h3>
+        <p className="text-amber-700 text-sm">Faça login para submeter trabalhos ou acessar suas atribuições.</p>
+      </div>
+      <Link href="/login" className="bg-amber-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-amber-700 transition-colors">
+        Fazer Login
+      </Link>
+    </div>
+  );
+}
+
 function CardGestao({ titulo, subtitulo, href, cor, label, disabled }: any) {
   const content = (
     <div className={`bg-white p-8 rounded-3xl border border-slate-200 transition-all group h-full ${disabled ? 'opacity-60 grayscale-[0.5]' : 'hover:shadow-xl'}`}>
@@ -136,8 +141,6 @@ function CardGestao({ titulo, subtitulo, href, cor, label, disabled }: any) {
       </span>
     </div>
   );
-
   if (disabled) return content;
-
   return <Link href={href}>{content}</Link>;
 }
