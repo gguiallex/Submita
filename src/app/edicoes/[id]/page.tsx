@@ -25,11 +25,11 @@ export default function PainelEdicaoPage() {
 
   const isLogado = !!user;
   const isAdminGeral = user?.role === 'ADMIN_GERAL';
-  
+
   // VERIFICAÇÃO DE VÍNCULOS ESPECÍFICOS DESTA EDIÇÃO
   const isRevisor = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'REVISOR');
   const isChair = user?.vinculos?.some((v: any) => v.edicaoId === Number(id) && v.tipo === 'CHAIR');
-  
+
   const podeGerenciar = isAdminGeral || isChair;
 
   const getArtigosInfo = () => {
@@ -58,7 +58,7 @@ export default function PainelEdicaoPage() {
           </div>
 
           {isLogado && !podeGerenciar && (
-            <Link 
+            <Link
               href={`/edicoes/${id}/submeter`}
               className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-[1.02] transition-all text-center"
             >
@@ -68,9 +68,9 @@ export default function PainelEdicaoPage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <CardGestao 
-            titulo={artigosCard.titulo} 
-            subtitulo={artigosCard.sub} 
+          <CardGestao
+            titulo={artigosCard.titulo}
+            subtitulo={artigosCard.sub}
             href={artigosCard.href}
             cor="bg-orange-500"
             label={artigosCard.label}
@@ -79,19 +79,40 @@ export default function PainelEdicaoPage() {
 
           {/* NOVO CARD: APARECE APENAS PARA REVISORES DESTA EDIÇÃO */}
           {isRevisor && (
-            <CardGestao 
-              titulo="Avaliação" 
-              subtitulo="Trabalhos para revisar" 
-              href="/revisor" 
-              cor="bg-amber-500" 
-              label="Avaliar →" 
+            <CardGestao
+              titulo="Avaliação"
+              subtitulo="Trabalhos para revisar"
+              href="/revisor"
+              cor="bg-amber-500"
+              label="Avaliar →"
             />
           )}
 
           {podeGerenciar && (
             <>
-              <CardGestao titulo="Revisores" subtitulo="Banca examinadora" href={`/edicoes/${id}/revisores`} cor="bg-purple-500" label="Gerenciar →" />
-              <CardGestao titulo="Perguntas" subtitulo="Critérios de avaliação" href={`/edicoes/${id}/perguntas`} cor="bg-green-500" label="Definir →" />
+              <CardGestao
+                titulo="Revisores"
+                subtitulo="Banca examinadora"
+                href={`/edicoes/${id}/revisores`}
+                cor="bg-purple-500"
+                label="Gerenciar →"
+              />
+              <CardGestao
+                titulo="Perguntas"
+                subtitulo="Critérios de avaliação"
+                href={`/edicoes/${id}/perguntas`}
+                cor="bg-green-500"
+                label="Definir →"
+              />
+
+              {/* NOVO CARD DE RESULTADOS */}
+              <CardGestao
+                titulo="Resultados"
+                subtitulo="Ver notas e pareceres"
+                href={`/edicoes/${id}/resultados`}
+                cor="bg-indigo-600"
+                label="Analisar →"
+              />
             </>
           )}
         </div>
@@ -105,8 +126,8 @@ export default function PainelEdicaoPage() {
               {isRevisor ? 'Área de Atuação: Revisor' : 'Área do Autor'}
             </h3>
             <p className={`text-sm ${isRevisor ? 'text-amber-700' : 'text-blue-600'}`}>
-              {isRevisor 
-                ? 'Você faz parte da banca examinadora desta edição. Utilize o card de "Avaliação" para acessar os trabalhos atribuídos a você.' 
+              {isRevisor
+                ? 'Você faz parte da banca examinadora desta edição. Utilize o card de "Avaliação" para acessar os trabalhos atribuídos a você.'
                 : 'Bem-vindo! Você pode submeter novos trabalhos ou acompanhar o status dos seus envios.'}
             </p>
           </div>

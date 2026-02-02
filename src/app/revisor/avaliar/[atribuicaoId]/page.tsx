@@ -20,14 +20,14 @@ export default function AvaliarArtigoPage() {
       const data = await res.json();
       setAtribuicao(data);
       setPerguntas(data.artigo.edicao.perguntas);
-      
+
       // Se já existirem respostas, carrega-as no estado
       const initialRespostas: any = {};
       data.respostas.forEach((r: any) => {
         initialRespostas[r.perguntaId] = r.resposta;
       });
       setRespostas(initialRespostas);
-      
+
       setLoading(false);
     };
     fetchData();
@@ -36,7 +36,7 @@ export default function AvaliarArtigoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEnviando(true);
-    
+
     try {
       const res = await fetch(`/api/atribuicoes/${atribuicaoId}/respostas`, {
         method: 'POST',
@@ -72,25 +72,42 @@ export default function AvaliarArtigoPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {perguntas.map((pergunta) => (
             <div key={pergunta.id} className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-              <label className="block text-slate-800 font-bold mb-4">{pergunta.texto}</label>
-              
-              {/* Exemplo para pergunta tipo Escala (1 a 5) */}
-              <div className="flex justify-between gap-2">
-                {[1, 2, 3, 4, 5].map((nota) => (
-                  <button
-                    key={nota}
-                    type="button"
-                    onClick={() => setRespostas({ ...respostas, [pergunta.id]: String(nota) })}
-                    className={`flex-1 py-3 rounded-xl font-black transition-all ${
-                      respostas[pergunta.id] === String(nota)
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                    }`}
-                  >
-                    {nota}
-                  </button>
-                ))}
-              </div>
+              <label className="block text-slate-800 font-bold mb-4">
+                {pergunta.texto}
+                <span className="block text-[10px] text-slate-400 uppercase mt-1 tracking-widest">
+                  {pergunta.tipo === 'escala' ? 'Nota de 1 a 5' : 'Resposta em texto'}
+                </span>
+              </label>
+
+              {/* LÓGICA CONDICIONAL DE RENDERIZAÇÃO */}
+              {pergunta.tipo === 'escala' ? (
+                // Renderiza os botões de 1 a 5
+                <div className="flex justify-between gap-2">
+                  {[1, 2, 3, 4, 5].map((nota) => (
+                    <button
+                      key={nota}
+                      type="button"
+                      onClick={() => setRespostas({ ...respostas, [pergunta.id]: String(nota) })}
+                      className={`flex-1 py-4 rounded-xl font-black transition-all ${respostas[pergunta.id] === String(nota)
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100 border border-transparent'
+                        }`}
+                    >
+                      {nota}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                // Renderiza o campo de texto (textarea)
+                <textarea
+                  rows={4}
+                  placeholder="Digite sua avaliação técnica aqui..."
+                  className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-700 font-medium"
+                  value={respostas[pergunta.id] || ''}
+                  onChange={(e) => setRespostas({ ...respostas, [pergunta.id]: e.target.value })}
+                  required
+                />
+              )}
             </div>
           ))}
 
